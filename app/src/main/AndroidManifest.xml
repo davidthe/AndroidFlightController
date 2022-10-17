@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- Always include this permission -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Include only if your app benefits from precise location access. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -12,6 +19,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AirplaneController"
         tools:targetApi="31">
+        <service
+            android:name=".AblyService"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
+            android:name=".SensorsService"
+            android:enabled="true"
+        android:exported="true" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
