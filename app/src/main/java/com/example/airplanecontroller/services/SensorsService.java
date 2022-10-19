@@ -1,5 +1,7 @@
 package com.example.airplanecontroller.services;
 
+import static android.hardware.SensorManager.SENSOR_DELAY_GAME;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -7,7 +9,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.hardware.Sensor;
-import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -23,14 +24,6 @@ import com.github.pwittchen.reactivesensors.library.ReactiveSensors;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-//import com.github.pwittchen.reactivesensors.library.ReactiveSensorEvent;
-//import com.github.pwittchen.reactivesensors.library.ReactiveSensors;
-//
-//import io.nlopez.smartlocation.OnLocationUpdatedListener;
-//import io.nlopez.smartlocation.SmartLocation;
-//import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-//import io.reactivex.rxjava3.functions.Consumer;
-//import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class SensorsService extends Service {
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
@@ -43,19 +36,18 @@ public class SensorsService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("","onStartCommand");
-//        String input = intent.getStringExtra("inputExtra");
-//        createNotificationChannel();
-//        Intent notificationIntent = new Intent(this, MainActivity.class);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-//                0, notificationIntent, 0);
+        String input = intent.getStringExtra("inputExtra");
+        createNotificationChannel();
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Foreground Service")
-                .setContentText("input")
+                .setContentText(input)
                 .setSmallIcon(R.drawable.ic_launcher_background).build();
         startForeground(1, notification);
 //
         startSubscribingToSensors();
-//        startSubscribingToGps();
 
         Thread mainThread = new Thread(new Runnable() {
             @Override
@@ -71,8 +63,6 @@ public class SensorsService extends Service {
         });
         mainThread.start();
 
-        //do heavy work on a background thread
-        //stopSelf();
         return START_NOT_STICKY;
     }
 
@@ -100,7 +90,7 @@ public class SensorsService extends Service {
     }
 
     private void startSubscribingToSensors(){
-        new ReactiveSensors(getApplicationContext()).observeSensor(Sensor.TYPE_GYROSCOPE)
+        new ReactiveSensors(getApplicationContext()).observeSensor(Sensor.TYPE_ACCELEROMETER  )
                 .subscribeOn(Schedulers.computation())
                 .filter(ReactiveSensorEvent::sensorChanged)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -113,20 +103,13 @@ public class SensorsService extends Service {
 
                         String message = String.format("x = %f, y = %f, z = %f", x, y, z);
 
-                        Log.d("gyroscope readings", message);
+//                        Log.d("gyroscope readings", message);
+
+                        Intent i = new Intent("sensors_update");
+                        i.putExtra("sensors", message);
+                        sendBroadcast(i);
                     }
 
                 });
     }
-
-//    private void startSubscribingToGps(){
-//        SmartLocation.with(this.getApplicationContext()).location()
-//                .start(new OnLocationUpdatedListener() {
-//                    @Override
-//                    public void onLocationUpdated(Location location) {
-//                        Log.d("location readings", location.toString());
-//
-//                    }
-//                });
-//    }
 }
